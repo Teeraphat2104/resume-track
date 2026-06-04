@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -79,6 +79,13 @@ export function DashboardClient({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [submissions, setSubmissions] = useState(initial);
+  const prevInitial = useRef(initial);
+  useEffect(() => {
+    if (prevInitial.current !== initial) {
+      setSubmissions(initial);
+      prevInitial.current = initial;
+    }
+  }, [initial]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
