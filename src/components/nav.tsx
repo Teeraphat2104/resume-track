@@ -6,6 +6,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { FileText, BarChart3, LogOut } from "lucide-react";
+import { ThemeSelector } from "@/components/theme-selector";
 
 const links = [
   { href: "/dashboard", label: "Applications", icon: FileText },
@@ -50,10 +51,11 @@ export function Nav({ email }: { email: string }) {
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <span className="hidden text-sm text-muted-foreground sm:inline">
             {email}
           </span>
+          <ThemeSelector />
           <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
             <LogOut className="h-4 w-4" />
           </Button>
