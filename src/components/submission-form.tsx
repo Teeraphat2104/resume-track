@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +26,10 @@ type Props = {
     applied_at: string;
     notes: string;
   };
+  onSuccess?: () => void;
 };
 
-export function SubmissionForm({ defaultValues }: Props) {
-  const router = useRouter();
+export function SubmissionForm({ defaultValues, onSuccess }: Props) {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>(
@@ -44,7 +43,7 @@ export function SubmissionForm({ defaultValues }: Props) {
     setLoading(true);
 
     const form = new FormData(e.currentTarget);
-    const payload = {
+    const payload: Record<string, string | null> = {
       company: form.get("company") as string,
       position: form.get("position") as string,
       job_url: (form.get("job_url") as string) || null,
@@ -56,10 +55,7 @@ export function SubmissionForm({ defaultValues }: Props) {
     };
 
     if (isEdit) {
-      await supabase
-        .from("submissions")
-        .update(payload)
-        .eq("id", defaultValues.id!);
+      await supabase.from("submissions").update(payload).eq("id", defaultValues.id!);
     } else {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -67,15 +63,14 @@ export function SubmissionForm({ defaultValues }: Props) {
     }
 
     setLoading(false);
-    router.push("/dashboard");
-    router.refresh();
+    onSuccess?.();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Company *</label>
+          <label className="text-sm font-medium">Company</label>
           <Input
             name="company"
             required
@@ -84,7 +79,7 @@ export function SubmissionForm({ defaultValues }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Position *</label>
+          <label className="text-sm font-medium">Position</label>
           <Input
             name="position"
             required
@@ -128,7 +123,12 @@ export function SubmissionForm({ defaultValues }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <label className="text-sm font-medium">Status</label>
-          <Select value={status} onValueChange={(value) => { if (value !== null) setStatus(value); }}>
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              if (value !== null) setStatus(value);
+            }}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -142,7 +142,7 @@ export function SubmissionForm({ defaultValues }: Props) {
           </Select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Applied Date *</label>
+          <label className="text-sm font-medium">Applied date</label>
           <Input
             name="applied_at"
             type="date"
@@ -165,16 +165,13 @@ export function SubmissionForm({ defaultValues }: Props) {
         />
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-3">
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : isEdit ? "Update" : "Add"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push("/dashboard")}
-        >
-          Cancel
+          {loading
+            ? "Saving..."
+            : isEdit
+              ? "Save changes"
+              : "Add application"}
         </Button>
       </div>
     </form>

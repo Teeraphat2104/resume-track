@@ -4,17 +4,17 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Mail } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState(false);
   const supabase = createClient();
 
   const signInWithGoogle = async () => {
+    setLoadingGoogle(true);
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -25,7 +25,7 @@ export default function LoginPage() {
 
   const signInWithEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingEmail(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -33,39 +33,30 @@ export default function LoginPage() {
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
     });
-    setLoading(false);
+    setLoadingEmail(false);
     if (!error) setSent(true);
   };
 
-  if (sent) {
-    return (
-      <div className="flex min-h-svh items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>Check your email</CardTitle>
-            <CardDescription>
-              A magic link has been sent to {email}
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Resume Tracker</CardTitle>
-          <CardDescription>Sign in to track your applications</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-sm space-y-6">
+        <div className="text-center">
+          <h1 className="text-xl font-semibold tracking-tight">
+            Resume Tracker
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sign in to manage your applications
+          </p>
+        </div>
+
+        <div className="space-y-4">
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full gap-2"
             onClick={signInWithGoogle}
+            disabled={loadingGoogle}
           >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                 fill="#4285F4"
@@ -83,30 +74,41 @@ export default function LoginPage() {
                 fill="#EA4335"
               />
             </svg>
-            Continue with Google
+            {loadingGoogle ? "Signing in..." : "Continue with Google"}
           </Button>
 
           <div className="relative">
-            <Separator />
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-              OR
-            </span>
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
           </div>
 
-          <form onSubmit={signInWithEmail} className="space-y-3">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Sending..." : "Send magic link"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          {sent ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Check your email for the magic link.
+            </p>
+          ) : (
+            <form onSubmit={signInWithEmail} className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1"
+              />
+              <Button type="submit" disabled={loadingEmail}>
+                {loadingEmail ? "Sending..." : <Mail className="h-4 w-4" />}
+              </Button>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

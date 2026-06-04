@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Nav } from "@/components/nav";
 
-export default async function DashboardLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,7 +17,9 @@ export default async function DashboardLayout({
   return (
     <>
       <Nav email={user.email ?? ""} />
-      <main className="mx-auto w-full max-w-5xl flex-1 p-4">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+        {children}
+      </main>
     </>
   );
 }
