@@ -13,12 +13,16 @@ export default function LoginPage() {
   const [loadingEmail, setLoadingEmail] = useState(false);
   const supabase = createClient();
 
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "");
+
   const signInWithGoogle = async () => {
     setLoadingGoogle(true);
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        redirectTo: `${origin}/auth/callback`,
       },
     });
   };
@@ -30,7 +34,7 @@ export default function LoginPage() {
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${location.origin}/auth/callback`,
+        emailRedirectTo: `${origin}/auth/callback`,
       },
     });
     setLoadingEmail(false);
