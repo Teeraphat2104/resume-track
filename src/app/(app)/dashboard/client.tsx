@@ -33,6 +33,7 @@ import { ExternalLink, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SubmissionForm } from "@/components/submission-form";
 import { toast } from "sonner";
+import { GmailSync } from "@/components/gmail-sync";
 
 type Submission = {
   id: string;
@@ -151,6 +152,8 @@ export function DashboardClient({
             Add application
           </Button>
         </div>
+
+        <GmailSync />
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
